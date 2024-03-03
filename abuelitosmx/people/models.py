@@ -11,6 +11,11 @@ class Location(models.Model):
     https://www.inegi.org.mx/app/ageeml/
     """
 
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     agee_code = models.CharField(
         _("AGEE code"),
         max_length=2,
@@ -35,6 +40,22 @@ class Location(models.Model):
         _("location name"),
         max_length=50,
     )
+    created_at = models.DateTimeField(
+        _("created at"),
+        auto_now_add=True,
+        help_text=_(
+            "This timestamp shows when this record was created. This field is "
+            "populated automatically."
+        ),
+    )
+    updated_at = models.DateTimeField(
+        _("updated at"),
+        auto_now=True,
+        help_text=_(
+            "This timestamp shows when this record was last updated. This field is "
+            "populated automatically."
+        ),
+    )
 
     class Meta:
         constraints = [
@@ -44,8 +65,16 @@ class Location(models.Model):
             )
         ]
 
+    def __str__(self):
+        return f"{self.loc_name}, {self.agem_name}, {self.agee_name}"
+
 
 class Person(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     slug = models.SlugField(
         _("slug"),
         unique=True,
@@ -60,16 +89,19 @@ class Person(models.Model):
     alias = models.CharField(
         _("alias"),
         max_length=50,
+        blank=True,
         help_text=_("Alias of the person."),
     )
-    birth_date = models.DateField(
-        _("birth date"),
+    date_of_birth = models.DateField(
+        _("date of birth"),
         blank=True,
+        null=True,
         help_text=_("Date of birth of the person."),
     )
-    death_date = models.DateField(
-        _("death date"),
+    date_of_death = models.DateField(
+        _("date of death"),
         blank=True,
+        null=True,
         help_text=_("Date of death of the person."),
     )
     biography = models.TextField(
@@ -98,7 +130,7 @@ class Person(models.Model):
         help_text=_("Anecdotes of the person."),
     )
     picture_ft = models.ImageField(
-        _("picture for their family tree"),
+        _("family tree picture"),
         upload_to="persons/pictures_ft/",
         blank=True,
         help_text=_("Picture of this person that will be shown in the family tree."),
@@ -173,3 +205,29 @@ class Person(models.Model):
         blank=True,
         help_text=_("Caption for the fifth picture of this person."),
     )
+    location = models.ForeignKey(
+        Location,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        help_text=_("Location where this person lived most of their life."),
+    )
+    created_at = models.DateTimeField(
+        _("created at"),
+        auto_now_add=True,
+        help_text=_(
+            "This timestamp shows when this record was created. This field is "
+            "populated automatically."
+        ),
+    )
+    updated_at = models.DateTimeField(
+        _("updated at"),
+        auto_now=True,
+        help_text=_(
+            "This timestamp shows when this record was last updated. This field is "
+            "populated automatically."
+        ),
+    )
+
+    def __str__(self):
+        return f"{self.full_name}"
